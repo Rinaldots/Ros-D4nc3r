@@ -1,0 +1,4 @@
+source;share/dancer/local_setup.bash
+source;share/dancer/local_setup.dsv
+source;share/dancer/local_setup.sh
+source;share/dancer/local_setup.zsh

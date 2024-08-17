@@ -1,0 +1,9 @@
+<library path="diffdrive_d4nc3r">
+
+  <class name="d4nc3r_base/DiffDriveD4nc3r" type="d4nc3r_base::DiffDriveD4nc3r" base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware interface implementation for the D4nc3r robot.
+    </description>
+  </class>
+
+</library>
