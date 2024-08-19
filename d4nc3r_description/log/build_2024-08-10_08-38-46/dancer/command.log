@@ -1,0 +1,2 @@
+Invoking command in '/home/rinaldo/baile/src/d4nc3r_description/build/dancer': /usr/bin/cmake /home/rinaldo/baile/src/d4nc3r_description -DCMAKE_INSTALL_PREFIX=/home/rinaldo/baile/src/d4nc3r_description/install/dancer
+Invoked command in '/home/rinaldo/baile/src/d4nc3r_description/build/dancer' returned '1': /usr/bin/cmake /home/rinaldo/baile/src/d4nc3r_description -DCMAKE_INSTALL_PREFIX=/home/rinaldo/baile/src/d4nc3r_description/install/dancer
