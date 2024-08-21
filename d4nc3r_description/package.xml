@@ -2,10 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>d4nc3r_description</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="rinaldo@todo.todo">rinaldo</maintainer>
-  <license>TODO: License declaration</license>
+  <version>0.1.0</version>
+  <description>The d4nc3r_description package</description>
+
+  <author email="rinaldo.filho.095@ufrn.edu.com">Rinaldo T.S Filho</author>
+  <maintainer email="rinaldo.filho.095@ufrn.edu.com">Rinaldo T.S Filho</maintainer>
+  <license file="LICENSE">BSD Clause 3</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
