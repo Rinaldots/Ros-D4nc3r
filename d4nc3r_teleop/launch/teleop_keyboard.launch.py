@@ -30,16 +30,26 @@
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
+    namespace = LaunchConfiguration('namespace')
+    namespace_args = DeclareLaunchArgument(
+        'namespace',
+        default_value='d4nc3r1',
+        description='Initial x pose of andino in the simulation',
+    )
     teleop_node = Node(
             package='teleop_twist_keyboard',
             executable='teleop_twist_keyboard',
             name='teleop_twist_keyboard_node',
             output='screen',
             prefix = 'xterm -e',
+            namespace= namespace,
          )
 
     return LaunchDescription([
+        namespace_args,
         teleop_node,
     ])
