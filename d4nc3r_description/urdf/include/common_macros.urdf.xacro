@@ -184,6 +184,7 @@
       </geometry>
     </collision>
     </link>
+    
   </xacro:macro>
 
 <!-- ===================== Footprint xacro ==========================================

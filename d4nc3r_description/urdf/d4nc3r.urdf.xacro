@@ -26,9 +26,6 @@
   <xacro:property name="second_base_yaml" value="$(arg yaml_config_dir)/second_base.yaml" />
   <xacro:property name="second_base_props" value="${xacro.load_yaml(second_base_yaml)}"/>
 
-  
-  <xacro:property name="hardware_yaml" value="$(arg yaml_config_dir)/hardware.yaml" />
-  <xacro:property name="hardware_props" value="${xacro.load_yaml(hardware_yaml)}"/>
 
 
   <!-- Footprint link -->
@@ -38,11 +35,20 @@
   <xacro:base link_name="base_link" base_prop="${base_props}" mesh="${base_props['base']['mesh']}" >
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:base>
+  
 
   <!-- Second story link -->
   <xacro:base link_name="second_base_link" base_prop="${second_base_props}" mesh="${second_base_props['base']['mesh']}" >
     <origin xyz="0 0 0.001" rpy="0 0 0" />
+    
   </xacro:base>
+
+  <link name="dummy">
+   </link>
+  <joint name="dummy_joint" type="fixed">
+     <parent link="dummy"/>
+     <child link="base_link"/>
+   </joint>
   
   <!-- Joint to connect second_story with base_link -->
   <joint name="second_base_joint" type="fixed">
@@ -82,7 +88,6 @@
   <!-- ros2_control -->
   <xacro:if value="$(arg use_real_ros_control)">
     <xacro:include filename="$(find ${package_name})/urdf/include/d4nc3r_control.urdf.xacro" />
-    <xacro:control hardware_props="${hardware_props}" />
   </xacro:if>
 
 
