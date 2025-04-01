@@ -56,12 +56,10 @@ void MotorControll_callback(const void* msg_in) {
   Serial.println(actuating_signal_LW);
   Serial.print("ActuatingSignal_RW: ");
   Serial.println(actuating_signal_RW);
-  if(currentRpmL > 0 || currentRpmR > 0 || currentRpmL < 0 || currentRpmR < 0 || actuating_signal_LW > threshold || actuating_signal_RW > threshold || actuating_signal_LW < -threshold || actuating_signal_RW < -threshold){
-    rightWheel.moveBase(actuating_signal_RW, threshold);
-    leftWheel.moveBase(actuating_signal_LW, threshold);
-  }
   
-
+  rightWheel.moveBase(actuating_signal_RW, threshold);
+  leftWheel.moveBase(actuating_signal_LW, threshold);
+  
 }
 
 

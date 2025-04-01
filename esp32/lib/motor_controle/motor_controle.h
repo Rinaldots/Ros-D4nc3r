@@ -5,10 +5,10 @@
 #include <std_msgs/msg/int32.h>
 #include <geometry_msgs/msg/twist.h>
 // Pin Definitions
-#define motor_left_a 33
-#define motor_left_b 32
-#define motor_right_b 26
-#define motor_right_a 25
+#define A_IA 33
+#define A_IB 32
+#define B_IA 25
+#define B_IB 26
 
 // PWM Channels
 #define pwm_channel_mr_a 0
@@ -45,11 +45,12 @@ public:
   int tick;
   int status = 0;
 
-  MotorController(int8_t ForwardPin, int8_t BackwardPin, int tickPerRevolution, int pwmChannel1, int pwmChannel2);
+  MotorController(int8_t ForwardPin, int8_t BackwardPin, int tickPerRevolution, int pwmChannel1, int pwmChannel2, bool inveterted);
   void initPID(float proportionalGain, float integralGain, float derivativeGain);
   float getRpm();
   float getRpm_real();
   float pid(float setpoint, float feedback);
+  bool inveterted;
   void moveBase(float ActuatingSignal, int threshold);
   void stop();
   int32_t getEncoderCount();

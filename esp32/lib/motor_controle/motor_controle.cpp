@@ -4,24 +4,26 @@ float kp = 1, ki = 0.5, total_error, proportional_error;
 const int freq = 5000;
 const int resolution = 8;
 
-MotorController leftWheel(motor_left_a, motor_left_b, 8, pwm_channel_ml_a, pwm_channel_ml_b); // Initialize with actual values
-MotorController rightWheel(motor_right_a, motor_right_b, 8, pwm_channel_mr_a, pwm_channel_mr_b); // Initialize with actual values
+MotorController leftWheel(A_IA, A_IB, 8, pwm_channel_ml_a, pwm_channel_ml_b, 0); // Initialize with actual values
+MotorController rightWheel(B_IA, B_IB, 8, pwm_channel_mr_a, pwm_channel_mr_b, 1); // Initialize with actual values
 
 void motor_setup() {
-  leftWheel = MotorController(motor_left_a, motor_left_b, 8, pwm_channel_ml_a, pwm_channel_ml_b); // Replace with actual values
-  rightWheel = MotorController(motor_right_a, motor_right_b, 8, pwm_channel_mr_a, pwm_channel_mr_b); // Replace with actual values
-  leftWheel.initPID(kp, ki, 0.1); // Replace 0 with actual kd value
-  rightWheel.initPID(kp, ki, 0.1); // Replace 0 with actual kd value
+  leftWheel.moveBase(0, 0);
+  rightWheel.moveBase(255, 0);
+  leftWheel.initPID(kp, ki, 0.01); // Replace 0 with actual kd value
+  rightWheel.initPID(kp, ki, 0.01); // Replace 0 with actual kd value
 }
 
-MotorController::MotorController(int8_t ForwardPin, int8_t BackwardPin, int tickPerRevolution, int pwmChannel1, int pwmChannel2) {
+MotorController::MotorController(int8_t ForwardPin, int8_t BackwardPin, int tickPerRevolution, int pwmChannel1, int pwmChannel2, bool inveterted) {
   this->Forward = ForwardPin;
   this->Backward = BackwardPin;
   this->tick = tickPerRevolution;
   this->pwmChannel1 = pwmChannel1;
   this->pwmChannel2 = pwmChannel2;
   this->EncoderCount.data = 0;
+  this->inveterted = inveterted;
   rpmPrev = 0;
+  
   // Setup PWM channels
   ledcSetup(pwmChannel1, freq, resolution); // 2^8 = 256, 0-255
   ledcSetup(pwmChannel2, freq, resolution); // 2^8 = 256, 0-255
@@ -79,19 +81,16 @@ float MotorController::pid(float setpoint, float feedback) {
 
 void MotorController::moveBase(float ActuatingSignal, int threshold) {
   float signal;
+  signal = ActuatingSignal + threshold;
   
-
-  if (ActuatingSignal > 0){
-    signal = ActuatingSignal + threshold;
-    status = 1;
-  }else{
-    signal = ActuatingSignal - threshold;
-    status = -1;
-  }
   if (signal > 255) {
     signal = 255;
   }else if (signal < -255){
     signal = -255;
+  }
+
+  if(inveterted){
+    signal = 255-signal;
   }
 
   if (signal < threshold && signal > 0){
@@ -99,23 +98,26 @@ void MotorController::moveBase(float ActuatingSignal, int threshold) {
   }else if(signal > -threshold && signal < 0){
     signal = 0;
   }
+  if(inveterted){
+    Serial.print("RightSignal: ");
+    Serial.println(signal);
+  }else{
+    Serial.print("LeftSignal: ");
+    Serial.println(signal);
+  }
 
-  Serial.print("AcSignal: ");
-  Serial.println(signal);
-
+  
   if (signal > 0) {
     ledcWrite(pwmChannel1, signal);
     ledcWrite(pwmChannel2, 0);
   } else {
     ledcWrite(pwmChannel1, 0);
-    ledcWrite(pwmChannel2, -signal);
+    ledcWrite(pwmChannel2, signal);
   }
+  
 }
 
-void MotorController::stop() {
-  ledcWrite(pwmChannel1, 0);
-  ledcWrite(pwmChannel2, 0);
-}
+
 
 int32_t MotorController::getEncoderCount() {
   return EncoderCount.data;
