@@ -60,6 +60,7 @@ def generate_launch_description():
             ('/diff_controller/cmd_vel_out', '/cmd_vel_out'), # Used if publish_limited_velocity param is true
             ('/diff_controller/odom', '/odom'),
         ],
+        namespace="/d4nc3r1/micro_ros",
         output="both",
     )
 

@@ -23,8 +23,10 @@ def generate_launch_description():
     arguments = {'yaml_config_dir': os.path.join(pkg_d4nc3r_description, 'config', 'd4nc3r')}
     doc = xacro.process_file(os.path.join(pkg_d4nc3r_description, 'urdf', 'd4nc3r.urdf.xacro'), mappings = arguments)
     robot_desc = doc.toprettyxml(indent='  ')
-    params = {'robot_description': robot_desc,
-              'publish_frequency': 30.0}
+    params = {
+        'robot_description': robot_desc,
+        'publish_frequency': 5.0,
+    }
 
     # Robot state publisher
     rsp = Node(package='robot_state_publisher',

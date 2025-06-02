@@ -58,8 +58,6 @@
                               o_rpy="${pi/2.0} 0.0 0.0" >
       </xacro:cylinder_inertia>
     </link>
-
-
     <joint name="${prefix}_wheel_joint" type="continuous">
       <axis xyz="0 1 0" rpy="0 0 0" />
       <parent link="base_link"/>
@@ -147,12 +145,8 @@
   <xacro:macro name="base"
                params="link_name:='base_link' base_prop mesh:='' scale:='' *origin ">
     <link name="${link_name}">
-    <xacro:cylinder_inertia m="${base_prop['base']['mass']}"
-                              r="${base_prop['base']['diameter']}"
-                              l="${base_prop['base']['height']}"
-                              o_xyz="0.0 0.0 0.0"
-                              o_rpy="${pi/2.0} 0.0 0.0" >
-    </xacro:cylinder_inertia>
+    <!-- Remover a inércia do link raiz -->
+    <!-- <xacro:cylinder_inertia ... /> -->
     <xacro:if value="${mesh != '' }" >
       <visual>
         <xacro:insert_block name="origin" />
@@ -184,7 +178,6 @@
       </geometry>
     </collision>
     </link>
-    
   </xacro:macro>
 
 <!-- ===================== Footprint xacro ==========================================
@@ -198,9 +191,14 @@
   <xacro:macro name="footprint"
                params="wheel_props">
     <!-- Base-Footprint -->
-    <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin -->
-    <link name="base_footprint" />
-
+    <link name="base_footprint">
+      <!-- Adicionar a inércia aqui -->
+      <xacro:cylinder_inertia m="${wheel_props['mass']}"
+                              r="${wheel_props['radius']}"
+                              l="${wheel_props['length']}"
+                              o_xyz="0.0 0.0 0.0"
+                              o_rpy="${pi/2.0} 0.0 0.0" />
+    </link>
     <!-- Joint to connect base_footprint with base_link -->
     <joint name="base_footprint_joint" type="fixed">
       <parent link="base_link"/>

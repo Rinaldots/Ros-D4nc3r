@@ -32,10 +32,11 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (DeclareLaunchArgument, GroupAction)
+from launch.actions import (DeclareLaunchArgument, GroupAction, IncludeLaunchDescription)
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PythonExpression
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import (Node)
 from xacro import process_file
 
@@ -101,6 +102,9 @@ def generate_launch_description():
 
     remappings = [('/tf', 'tf'), ('/tf_static', 'tf_static')]
     
+    # Remova o node spawn_entity.py do gazebo_ros e use o spawn do Gazebo Ionic (Ignition)
+    pkg_gz_sim = get_package_share_directory('ros_gz_sim')
+
     bringup_cmd_group = GroupAction([
         Node(
             package='robot_state_publisher', executable='robot_state_publisher',
@@ -113,22 +117,18 @@ def generate_launch_description():
             package='robot_state_publisher', executable='robot_state_publisher',
             name='robot_state_publisher', output='screen',
             parameters=[{'use_sim_time': use_sim_time,'publish_frequency': rsp_frequency,'robot_description': get_robot_description('true'),}],
-            remappings=remappings, condition=IfCondition(use_ros_control),namespace=namespace),   
-        Node(
-            package='gazebo_ros',
-            executable='spawn_entity.py',
-            arguments=[
-                '-topic', '/robot_description',
-                '-entity', entity,
-                '-x', initial_pose_x,
-                '-y', initial_pose_y,
-                '-z', initial_pose_z,
-                '-R', '0.0',
-                '-P', '0.0',
-                '-Y', initial_pose_yaw,
-                '-robot_namespace', namespace,
-                ]),
-        
+            remappings=remappings, condition=IfCondition(use_ros_control),namespace=namespace),
+
+        # Gazebo Ionic spawn
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(pkg_gz_sim, 'launch', 'gz_sim.launch.py')),
+            launch_arguments={
+                'world': LaunchConfiguration('world'),
+                'verbose': 'true'
+            }.items()
+        ),
+
+        # Os spawners de controller_manager continuam normalmente
         Node(
             package='controller_manager',
             executable='spawner',
@@ -161,4 +161,4 @@ def generate_launch_description():
     # Add the actions to launch all of the navigation nodes
     ld.add_action(bringup_cmd_group),
     
-    return ld        
+    return ld

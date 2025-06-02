@@ -49,9 +49,10 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     use_rviz = LaunchConfiguration('rviz')
     rviz_config_file = LaunchConfiguration('rviz_config_file')
-    
+    pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
     pkg_d4nc3r_gz = get_package_share_directory('d4nc3r_gz')
-    pkg_gz_sim = get_package_share_directory('ros_gz_sim')
+    pkg_turtlebot_gazebo = get_package_share_directory('turtlebot2_gazebo')  # Adicionado para o Turtlebot
+    pkg_gz_sim = get_package_share_directory('gz_sim')
     
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace', default_value='d4nc3r1',
@@ -62,7 +63,7 @@ def generate_launch_description():
         description='Use simulation (Gazebo) clock if true',)
 
     world_argument = DeclareLaunchArgument(
-        'world', default_value='empty.world',
+        name='world', default_value='empty.world',
         description='Full path to the world model file to load',)
 
     use_rviz_argument = DeclareLaunchArgument(
@@ -83,6 +84,13 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(pkg_gz_sim, 'launch', 'gz_sim.launch.py')),
             launch_arguments={'world': LaunchConfiguration('world'), 'verbose': 'true'}.items()
+            ),
+        # Spawn Turtlebot
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(pkg_turtlebot_gazebo, 'launch', 'turtlebot2_spawn_robot.launch.py')
+            ),
+            launch_arguments={'use_sim_time': use_sim_time}.items()
         ),
         # RViz
         Node(

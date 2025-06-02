@@ -46,7 +46,10 @@ def generate_launch_description():
             executable='ekf_node',
             name='ekf_filter_node',
             output='screen',
-            parameters=[os.path.join(get_package_share_directory("d4nc3r_handler"), 'config', 'ekf.yaml')]
+            parameters=[os.path.join(get_package_share_directory("d4nc3r_handler"), 'config', 'ekf.yaml')],
+            remappings=[
+                ('odometry/filtered', '/d4nc3r1/odometry/filtered'),
+            ],
            )
     
     

@@ -4,7 +4,7 @@ ekf_filter_node:
         # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
         # computation until it receives at least one message from one of the inputs. It will then run continuously at the
         # frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
-        frequency: 30.0
+        frequency: 3.0
 
         # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
         # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
@@ -36,7 +36,7 @@ ekf_filter_node:
         debug_out_file: /path/to/debug/file.txt
 
         # Whether we'll allow old measurements to cause a re-publication of the updated state
-        permit_corrected_publication: false
+        permit_corrected_publication: true
 
         # Whether to publish the acceleration state. Defaults to false if unspecified.
         publish_acceleration: false
@@ -48,7 +48,7 @@ ekf_filter_node:
         map_frame: map              # Defaults to "map" if unspecified
         odom_frame: odom            # Defaults to "odom" if unspecified
         base_link_frame: base_link  # Defaults to "base_link" if unspecified
-        world_frame: odom           # Defaults to the value of odom_frame if unspecified
+        world_frame: odom_frame     # Defaults to the value of odom_frame if unspecified
 
         # The filter accepts an arbitrary number of inputs from each input message type (nav_msgs/Odometry,
         # geometry_msgs/PoseWithCovarianceStamped, geometry_msgs/TwistWithCovarianceStamped,
@@ -60,25 +60,35 @@ ekf_filter_node:
         # Each sensor reading updates some or all of the filter's state. These options give you greater control over which
         # values from each measurement are fed to the filter. For example, if you have an odometry message as input, but only
         # want to use its Z position value, then set the entire vector to false, except for the third entry. The order of the
-        # values is x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. Note that not some message types
+        # values is x, y, z, 
+        #           roll, pitch, yaw, 
+        #           vx, vy, vz, 
+        #           vroll, vpitch, vyaw,
+        #           ax, ay, az. 
+        # Note that not some message types
         # do not provide some of the state variables estimated by the filter. For example, a TwistWithCovarianceStamped message
         # has no pose information, so the first six values would be meaningless in that case. Each vector defaults to all false
         # if unspecified, effectively making this parameter required for each sensor.
-        odom0_config: [true, false, false,
+        odom0_config: [true, true, false,
                        false, false, true,
                        true,  true,  false,
-                       false, true, true,
+                       false, false, true,
                        false, false, false]
 
         # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
         # the size of the subscription queue so that more measurements are fused.
         odom0_queue_size: 5
 
-        odom0_differential: false
-
+        odom0_differential: true
+        # If you have a differential odometry source, such as a wheel encoder, then set this to true. This will cause the
         odom0_relative: false
+        # filter to treat the data as relative to the previous measurement, rather than absolute. This is useful for
+        # wheel encoders, which are typically relative measurements. If you have an absolute measurement, such as a GPS
+        # position, then set this to false. If you have a sensor that provides both absolute and relative measurements,
 
-        odom0_pose_use_child_frame: false
+        odom0_pose_use_child_frame: true
+        # then set this to true. This will cause the filter to use the child frame's pose as the input, rather than the
+        # parent frame's pose. This is useful for sensors that provide both absolute and relative measurements, such as a
 
         odom0_pose_rejection_threshold: 2.0
         odom0_twist_rejection_threshold: 1.0
@@ -87,19 +97,23 @@ ekf_filter_node:
 
         imu0: /d4nc3r1/micro_ros/mpu6050
         imu0_config: [false, false, false,
-                      true,  true,  true,
                       false, false, false,
-                      true,  true,  true,
-                      true,  true,  true]
-        imu0_differential: false
-        imu0_relative: true
+                      false, false, false,
+                      false, false, true,
+                      true, true, true]
+        # The imu0_config vector is used to specify which values from the IMU message are used to update the filter's state.
+        imu0_relative: false
+        # If you have an IMU that provides relative measurements, such as a 9-axis IMU, then set this to true. This will
         imu0_queue_size: 5
         imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
         imu0_twist_rejection_threshold: 0.8                #
         imu0_linear_acceleration_rejection_threshold: 0.8  #
+        imu0_angular_velocity_rejection_threshold: 0.8     #
 
         # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
         # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
         imu0_remove_gravitational_acceleration: true
 
-        
+
+
+
