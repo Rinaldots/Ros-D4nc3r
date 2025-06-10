@@ -1,93 +1,108 @@
-# BSD 3-Clause License
-
-# Copyright (c) 2023, Ekumen Inc.
-# All rights reserved.
-
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
-
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-
-# 3. Neither the name of the copyright holder nor the names of its
-#    contributors may be used to endorse or promote products derived from
-#    this software without specific prior written permission.
-
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-import os
-
-from ament_index_python.packages import get_package_share_directory
+# Copyright 2020 ros2_control Development Team
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler
+from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
-from launch.substitutions import Command
+from launch.substitutions import Command, FindExecutable, PathJoinSubstitution, LaunchConfiguration
 
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
+    # Declare arguments
+    declared_arguments = []
+    namespace = LaunchConfiguration("namespace")
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "namespace",
+            default_value="d4nc3r1",
+            description="namespace for the robot and its controllers.",
+        )
+    )
+    
 
-    controller_params_file = os.path.join(get_package_share_directory("d4nc3r_control"),'config','d4nc3r_controllers.yaml')
+      # Get URDF via xacro
+    robot_description_content = ParameterValue(
+        Command([
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [FindPackageShare("d4nc3r_description"), "urdf", "d4nc3r.urdf.xacro"]
+            ),
+        ]),
+        value_type=str
+    )
 
-    # We need the robot description to be passed to the controller_manager
-    # So it can check the ros2_control parameters.
-    robot_description = Command(['ros2 param get --hide-type /robot_state_publisher robot_description'])
+    robot_description = {"robot_description": robot_description_content}
+
+    robot_controllers = PathJoinSubstitution(
+        [
+            FindPackageShare("d4nc3r_control"),
+            "config",
+            "d4nc3r_controllers.yaml",
+        ]
+    )
 
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[{'robot_description': ParameterValue(robot_description, value_type=str)},
-                    controller_params_file],
-        remappings=[
-            ('/diff_controller/cmd_vel', '/cmd_vel'), # Used if use_stamped_vel param is true
-            ('/diff_controller/cmd_vel_unstamped', '/cmd_vel'), # Used if use_stamped_vel param is false
-            ('/diff_controller/cmd_vel_out', '/cmd_vel_out'), # Used if publish_limited_velocity param is true
-            ('/diff_controller/odom', '/odom'),
-        ],
-        namespace="/d4nc3r1/micro_ros",
+        parameters=[robot_description, robot_controllers],
         output="both",
+        remappings=[
+            ("/diffbot_base_controller/cmd_vel", (namespace,"/cmd_vel")),
+            ("/joint_states", (namespace,"/joint_states")),
+            ("/diffbot_base_controller/odom", (namespace,"/odom_unfiltered")),
+            ("/diffbot_base_controller/transition_event", (namespace,"/transition_event")),
+            ("/dynamic_joint_states", (namespace,"/dynamic_joint_states")),
+        ],
     )
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+        arguments=["joint_state_broadcaster", "--controller-manager", "controller_manager"],  # removido /
     )
 
-    diff_drive_controller_spawner = Node(
+    robot_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["diff_controller", "--controller-manager", "/controller_manager"],
+        arguments=["diffbot_base_controller", "--controller-manager", "controller_manager"],  # removido /
+    
     )
 
-    # Delay start of diff_drive_controller_spawner after `joint_state_broadcaster`
-    delay_diff_drive_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
+    # Delay rviz start after `joint_state_broadcaster`
+    
+
+    # Delay start of joint_state_broadcaster after `robot_controller`
+    # TODO(anyone): This is a workaround for flaky tests. Remove when fixed.
+    delay_joint_state_broadcaster_after_robot_controller_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[diff_drive_controller_spawner],
+            target_action=robot_controller_spawner,
+            on_exit=[joint_state_broadcaster_spawner],
         )
     )
 
     nodes = [
         control_node,
-        joint_state_broadcaster_spawner,
-        delay_diff_drive_controller_spawner_after_joint_state_broadcaster_spawner,
+        #robot_state_pub_node,
+        robot_controller_spawner,
+        delay_joint_state_broadcaster_after_robot_controller_spawner,
     ]
 
-    return LaunchDescription(nodes)
+    # Return a flat list of launch actions
+    return LaunchDescription(declared_arguments + nodes)

@@ -1,0 +1,9 @@
+<library path="d4nc3r_hardware_interface">
+  <class name="d4nc3r_control/D4nc3rHardwareInterface"
+         type="d4nc3r_control::D4nc3rHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware interface for D4nc3r robot encoders.
+    </description>
+  </class>
+</library>

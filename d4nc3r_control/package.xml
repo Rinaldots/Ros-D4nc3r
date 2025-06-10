@@ -12,15 +12,19 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>d4nc3r_description</exec_depend>
-
+  <depend>rclcpp</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>std_msgs</depend>
+  <depend>rclcpp_lifecycle</depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>diff_drive_controller</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
   <exec_depend>ros2controlcli</exec_depend>
-
   <test_depend>ament_cmake_clang_format</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
+    <hardware_interface plugin="${prefix}/d4nc3r_hardware_interface_plugin.xml"/>
   </export>
 </package>

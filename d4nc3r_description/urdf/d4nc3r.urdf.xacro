@@ -6,7 +6,7 @@
 
   <xacro:include filename="$(find ${package_name})/urdf/include/common_macros.urdf.xacro" />
   <xacro:include filename="$(find ${package_name})/urdf/include/d4nc3r_caster_macro.urdf.xacro" />
-
+  
   <xacro:arg name="yaml_config_dir" default="$(find ${package_name})/config/${robot_name}" />
 
   <xacro:property name="caster_wheel_yaml" value="$(arg yaml_config_dir)/caster_wheel.yaml" />
@@ -88,5 +88,27 @@
     <child link="mpu_link"/>
     <origin xyz="-0.033 -0.010 0.02" rpy="0 0 3.1416"/>
   </joint>
+
+
+    <ros2_control name="D4nc3rRealHardware" type="system">
+    <hardware>
+      <plugin>d4nc3r_control/D4nc3rHardwareInterface</plugin>
+      <param name="encoder_topic_name">/d4nc3r1/encoders</param>
+      <param name="ticks_per_wheel_revolution">8.0</param>
+      <param name="left_encoder_data_index">1</param>
+      <param name="right_encoder_data_index">0</param>
+    </hardware>
+    <joint name="left_wheel_joint"> <!-- No type attribute here - correct -->
+      <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="right_wheel_joint"> <!-- No type attribute here - correct -->
+      <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
 
 </robot>
