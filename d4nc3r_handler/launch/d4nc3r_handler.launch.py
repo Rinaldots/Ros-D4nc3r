@@ -59,9 +59,16 @@ def generate_launch_description():
         )]),
         launch_arguments={'namespace': namespace}.items(),
     )
+    controller_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('d4nc3r_control'), 'launch', 'd4nc3r_control.launch.py'
+        )]),
+        launch_arguments={'namespace': namespace}.items(),
+    )
     
     return LaunchDescription([
         namespace_args,
         ekf_node,
         description_launch,
+        controller_launch,
     ])
