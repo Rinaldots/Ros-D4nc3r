@@ -40,7 +40,7 @@ ekf_filter_node:
         # do not provide some of the state variables estimated by the filter. For example, a TwistWithCovarianceStamped message
         # has no pose information, so the first six values would be meaningless in that case. Each vector defaults to all false
         # if unspecified, effectively making this parameter required for each sensor.
-        odom0_config: [true, true, false,
+        odom0_config: [ true, true, false,
                         false, false, true,  # Roll, Pitch, Yaw (Yaw is true)
                         true,  true,  false,
                         false, false, true,
@@ -53,18 +53,6 @@ ekf_filter_node:
         odom0_differential: true
         # If you have a differential odometry source, such as a wheel encoder, then set this to true. This will cause the
         odom0_relative: false
-        # filter to treat the data as relative to the previous measurement, rather than absolute. This is useful for
-        # wheel encoders, which are typically relative measurements. If you have an absolute measurement, such as a GPS
-        # position, then set this to false. If you have a sensor that provides both absolute and relative measurements,
-
-        odom0_pose_use_child_frame: false
-        # then set this to true. This will cause the filter to use the child frame's pose as the input, rather than the
-        # parent frame's pose. This is useful for sensors that provide both absolute and relative measurements, such as a
-
-        odom0_pose_rejection_threshold: 0.4
-        odom0_twist_rejection_threshold: 0.2
-
-        # Further input parameter examples
 
         imu0: /d4nc3r1/imu
         imu0_config: [false, false, false,
@@ -72,17 +60,7 @@ ekf_filter_node:
                       false, false, false,
                       false, false, true,
                       true, true, true]
-        # The imu0_config vector is used to specify which values from the IMU message are used to update the filter's state.
-        imu0_relative: false
-        # If you have an IMU that provides relative measurements, such as a 9-axis IMU, then set this to true. This will
         imu0_queue_size: 5
-        imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-        imu0_twist_rejection_threshold: 0.8                #
-        imu0_linear_acceleration_rejection_threshold: 0.8  #
-        imu0_angular_velocity_rejection_threshold: 0.8     #
-
-        # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
-        # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
         imu0_remove_gravitational_acceleration: false
 
 

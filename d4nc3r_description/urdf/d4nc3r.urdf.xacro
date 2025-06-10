@@ -86,7 +86,7 @@
   <joint name="mpu_joint" type="fixed">
     <parent link="base_link"/>
     <child link="mpu_link"/>
-    <origin xyz="-0.033 -0.010 0.02" rpy="0 0 3.1416"/>
+    <origin xyz="-0.033 -0.010 0.02" rpy="3.1416 0 0"/> <!-- Corrija a orientação aqui -->
   </joint>
 
 
