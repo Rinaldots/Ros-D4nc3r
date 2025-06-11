@@ -14,7 +14,6 @@
 -->
   <xacro:macro name="wheel"
                params="prefix reflect wheel_props base_props ">
-
   <xacro:property name="pos_x_joint"
      value="${(base_props['base']['x_size']/2) - wheel_props['x_offset']}"/>
   <xacro:property name="pos_y_joint"

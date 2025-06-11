@@ -3,7 +3,7 @@
 
   <xacro:property name="package_name" value="d4nc3r_description"/>
   <xacro:property name="robot_name" value="d4nc3r"/>
-
+z
   <xacro:include filename="$(find ${package_name})/urdf/include/common_macros.urdf.xacro" />
   <xacro:include filename="$(find ${package_name})/urdf/include/d4nc3r_caster_macro.urdf.xacro" />
   
@@ -94,7 +94,7 @@
     <hardware>
       <plugin>d4nc3r_control/D4nc3rHardwareInterface</plugin>
       <param name="encoder_topic_name">/d4nc3r1/encoders</param>
-      <param name="ticks_per_wheel_revolution">8.0</param>
+      <param name="ticks_per_wheel_revolution">16.0</param>
       <param name="left_encoder_data_index">1</param>
       <param name="right_encoder_data_index">0</param>
     </hardware>

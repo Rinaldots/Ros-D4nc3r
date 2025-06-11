@@ -17,18 +17,7 @@ from launch.substitutions import EnvironmentVariable
 import pathlib
 import launch.actions
 from launch.actions import DeclareLaunchArgument
-
-def generate_launch_description():
-    return LaunchDescription([
-        launch_ros.actions.Node(
-            package='robot_localization',
-            executable='ekf_node',
-            name='ekf_filter_node',
-            output='screen',
-            parameters=[os.path.join(get_package_share_directory("robot_localization"), 'params', 'ekf.yaml')],
-           ),
-])
-
+from launch.substitutions import PathJoinSubstitution
 
 def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
@@ -46,7 +35,7 @@ def generate_launch_description():
             executable='ekf_node',
             name='ekf_filter_node',
             output='screen',
-            parameters=[os.path.join(get_package_share_directory("d4nc3r_handler"), 'config', 'ekf.yaml')],
+            parameters=[robot_localization_file_path],
             remappings=[
                 ('odometry/filtered', '/d4nc3r1/odometry/filtered'),
             ],

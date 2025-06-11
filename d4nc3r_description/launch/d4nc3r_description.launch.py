@@ -6,26 +6,33 @@ from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-
+from launch_ros.parameter_descriptions import ParameterValue
 import xacro
 
 def generate_launch_description():
     
-    # Arguments
-    rsp_argument = DeclareLaunchArgument('rsp', default_value='true',
-                          description='Run robot state publisher node.')
     namespace_arg = DeclareLaunchArgument('namespace', default_value='d4nc3r1', description='Default namespace')
     namespace = LaunchConfiguration('namespace')
     # Obtains d4nc3r_description's share directory path.
     pkg_d4nc3r_description = get_package_share_directory('d4nc3r_description')
+    # Obtain urdf from xacro files using a default value for robot_name_arg.
+    from launch.substitutions import Command, PathJoinSubstitution
+    from launch_ros.substitutions import FindPackageShare
 
-    # Obtain urdf from xacro files.
-    arguments = {'yaml_config_dir': os.path.join(pkg_d4nc3r_description, 'config', 'd4nc3r')}
-    doc = xacro.process_file(os.path.join(pkg_d4nc3r_description, 'urdf', 'd4nc3r.urdf.xacro'), mappings = arguments)
-    robot_desc = doc.toprettyxml(indent='  ')
+    robot_description_content = Command([
+        'xacro ',
+        PathJoinSubstitution([
+            FindPackageShare('d4nc3r_description'),
+            'urdf',
+            'd4nc3r.urdf.xacro'
+        ]),
+        ' yaml_config_dir:=', os.path.join(pkg_d4nc3r_description, 'config', 'd4nc3r'),
+        ' robot_name_arg:=', namespace
+    ])
     params = {
-        'robot_description': robot_desc,
+        'robot_description': ParameterValue(robot_description_content, value_type=str),
         'publish_frequency': 5.0,
+        'prefix': namespace,
     }
 
     # Robot state publisher
@@ -34,12 +41,10 @@ def generate_launch_description():
                 namespace=namespace,
                 output='screen',
                 parameters=[params],
-                condition=IfCondition(LaunchConfiguration('rsp'))
+                remappings={('/robot_description', 'robot_description'),}
     )
-
     return LaunchDescription([
         
         namespace_arg,
-        rsp_argument,
         rsp,
     ])
