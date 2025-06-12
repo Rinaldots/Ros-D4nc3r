@@ -13,14 +13,14 @@
     - DEFAULT Value -> Empty string
 -->
   <xacro:macro name="wheel"
-               params="prefix reflect wheel_props base_props ">
+               params="robot_prefix prefix reflect wheel_props base_props ">
   <xacro:property name="pos_x_joint"
      value="${(base_props['base']['x_size']/2) - wheel_props['x_offset']}"/>
   <xacro:property name="pos_y_joint"
     value="${(base_props['base']['y_size']/2) + wheel_props['y_offset'] + (wheel_props['length']/2)}"/>
   <xacro:property name="pos_z_joint" value="${wheel_props['z_offset']}"/>
 
-    <link name="${prefix}_wheel">
+    <link name="${robot_prefix}${prefix}_wheel">
     <xacro:if value="${wheel_props['mesh'] != '' }" >
       <visual>
         <origin xyz="0.0 0 0" rpy="${pi/2} 0 ${pi/2.0*(reflect - 1)}"/>
@@ -57,13 +57,12 @@
                               o_rpy="${pi/2.0} 0.0 0.0" >
       </xacro:cylinder_inertia>
     </link>
-    <joint name="${prefix}_wheel_joint" type="continuous">
+    <joint name="${robot_prefix}${prefix}_wheel_joint" type="continuous">
       <axis xyz="0 1 0" rpy="0 0 0" />
-      <parent link="base_link"/>
-      <child link="${prefix}_wheel"/>
+      <parent link="${robot_prefix}base_link"/> <!-- Assuming base_link is the standard name for the main base -->
+      <child link="${robot_prefix}${prefix}_wheel"/>
       <origin xyz="${pos_x_joint} ${reflect* pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
       <dynamics damping="0.01" friction="0.0"/>
-      
     </joint>
 
   </xacro:macro>
@@ -79,15 +78,14 @@
     - DEFAULT Value -> Empty string
 -->
   <xacro:macro name="motor"
-               params="prefix reflect motor_props base_props ">
+               params="robot_prefix prefix reflect motor_props base_props ">
 
   <xacro:property name="pos_x_joint"
      value="${(base_props['base']['x_size']/2) - motor_props['x_offset']}"/>
   <xacro:property name="pos_y_joint"
     value="${(base_props['base']['y_size']/2) + motor_props['y_offset'] + (motor_props['y_size']/2)}"/>
   <xacro:property name="pos_z_joint" value="${motor_props['z_offset']}"/>
-
-    <link name="${prefix}_motor">
+    <link name="${robot_prefix}${prefix}_motor">
     <xacro:if value="${motor_props['mesh'] != '' }" >
       <visual>
         <origin xyz="0.0 0.0 0.0" rpy="0.0 0 ${pi/2.0*(reflect - 1)}"/>
@@ -124,9 +122,9 @@
       </xacro:box_inertia>
     </link>
 
-    <joint name="${prefix}_motor_joint" type="fixed">
-      <parent link="base_link"/>
-      <child link="${prefix}_motor"/>
+    <joint name="${robot_prefix}${prefix}_motor_joint" type="fixed">
+      <parent link="${robot_prefix}base_link"/> <!-- Assuming base_link is the standard name for the main base -->
+      <child link="${robot_prefix}${prefix}_motor"/>
       <origin xyz="${pos_x_joint} ${reflect* pos_y_joint} ${pos_z_joint}" rpy="0 ${-pi/2.0*(reflect - 1)} 0"/>
       <axis xyz="0 1 0" rpy="0 0 0" />
     </joint>
@@ -143,8 +141,8 @@
   - origin [block]: origin, position and orientation of the link;
 -->
   <xacro:macro name="base"
-               params="link_name:='base_link' base_prop mesh:='' scale:='' *origin ">
-    <link name="${link_name}">
+               params="robot_prefix link_name:='base_link' base_prop mesh:='' scale:='' *origin ">
+    <link name="${robot_prefix}${link_name}">
     <!-- Remover a inércia do link raiz -->
     <!-- <xacro:cylinder_inertia ... /> -->
     <xacro:if value="${mesh != '' }" >
@@ -189,9 +187,9 @@
   - origin [block]: origin, position and orientation of the link;
 -->
   <xacro:macro name="footprint"
-               params="wheel_props">
+               params="robot_prefix wheel_props">
     <!-- Base-Footprint -->
-    <link name="base_footprint">
+    <link name="${robot_prefix}base_footprint">
       <!-- Adicionar a inércia aqui -->
       <xacro:cylinder_inertia m="${wheel_props['mass']}"
                               r="${wheel_props['radius']}"
@@ -200,9 +198,9 @@
                               o_rpy="${pi/2.0} 0.0 0.0" />
     </link>
     <!-- Joint to connect base_footprint with base_link -->
-    <joint name="base_footprint_joint" type="fixed">
-      <parent link="base_link"/>
-      <child link="base_footprint" />
+    <joint name="${robot_prefix}base_footprint_joint" type="fixed">
+      <parent link="${robot_prefix}base_link"/> <!-- Assuming base_link is the standard name for the main base -->
+      <child link="${robot_prefix}base_footprint" />
       <origin xyz="0 0 ${-(wheel_props['radius'] - wheel_props['z_offset'])}" rpy="0 0 0" />
     </joint>
   </xacro:macro>

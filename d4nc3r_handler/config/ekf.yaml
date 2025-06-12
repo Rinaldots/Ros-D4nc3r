@@ -16,9 +16,9 @@ ekf_filter_node:
         publish_tf: true
        
         map_frame: map              # Defaults to "map" if unspecified
-        odom_frame: odom            # Defaults to "odom" if unspecified
-        base_link_frame: base_link  # Defaults to "base_link" if unspecified
-        world_frame: odom     # Defaults to the value of odom_frame if unspecified
+        odom_frame: d4nc3r1_odom            # Defaults to "odom" if unspecified
+        base_link_frame: d4nc3r1_base_link  # Defaults to "base_link" if unspecified
+        world_frame: d4nc3r1_odom     # Defaults to the value of odom_frame if unspecified
 
         odom0: /d4nc3r1/odom_unfiltered
         # Each sensor reading updates some or all of the filter's state. These options give you greater control over which

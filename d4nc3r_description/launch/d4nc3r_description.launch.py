@@ -11,7 +11,7 @@ import xacro
 
 def generate_launch_description():
     
-    namespace_arg = DeclareLaunchArgument('namespace', default_value='d4nc3r1', description='Default namespace')
+    namespace_arg = DeclareLaunchArgument('namespace', default_value='d4nc3r1', description='Namespace for the robot. Empty for no namespace.')
     namespace = LaunchConfiguration('namespace')
     # Obtains d4nc3r_description's share directory path.
     pkg_d4nc3r_description = get_package_share_directory('d4nc3r_description')
@@ -26,13 +26,13 @@ def generate_launch_description():
             'urdf',
             'd4nc3r.urdf.xacro'
         ]),
-        ' yaml_config_dir:=', os.path.join(pkg_d4nc3r_description, 'config', 'd4nc3r'),
-        ' robot_name_arg:=', namespace
+        ' yaml_config_dir:=', os.path.join(pkg_d4nc3r_description, 'config', robot_name_for_config), # Use a consistent name for config path
+        ' frame_prefix_arg:=', namespace
     ])
     params = {
         'robot_description': ParameterValue(robot_description_content, value_type=str),
         'publish_frequency': 5.0,
-        'prefix': namespace,
+        'prefix': "", # Set to empty string as link names in URDF will be prefixed
     }
 
     # Robot state publisher
@@ -44,7 +44,10 @@ def generate_launch_description():
                 remappings={('/robot_description', 'robot_description'),}
     )
     return LaunchDescription([
-        
         namespace_arg,
         rsp,
     ])
+
+# Helper to ensure config path uses the base robot name, not the namespaced one
+lc = LaunchContext()
+robot_name_for_config = "d4nc3r" # Assuming 'd4nc3r' is the base name for config files

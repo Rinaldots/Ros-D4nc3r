@@ -37,19 +37,7 @@ def generate_launch_description():
     
 
       # Get URDF via xacro
-    robot_description_content = ParameterValue(
-        Command([
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [FindPackageShare("d4nc3r_description"), "urdf", "d4nc3r.urdf.xacro"]
-            ),
-        ]),
-        value_type=str
-    )
-
-    robot_description = {"robot_description": robot_description_content}
-
+    
     robot_controllers = PathJoinSubstitution(
         [
             FindPackageShare("d4nc3r_control"),
@@ -61,18 +49,15 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description, robot_controllers],
+        parameters=[robot_controllers],
         output="both",
         remappings=[
             ("/diffbot_base_controller/cmd_vel", (namespace,"/cmd_vel")),
             ("/joint_states", (namespace,"/joint_states")),
             ("/diffbot_base_controller/odom", (namespace,"/odom_unfiltered")),
-            ("/robot_description", (namespace,"/robot_description")),
-            ("/tf", (namespace,"/tf")),
-            ("/tf_static", (namespace,"/tf_static")),
-            ("/joint_states", (namespace,"/joint_states")),
             ("/diffbot_base_controller/transition_event", (namespace,"/transition_event")),
             ("/dynamic_joint_states", (namespace,"/dynamic_joint_states")),
+            ("~/robot_description", (namespace,"/robot_description")),
         ],
     )
 
